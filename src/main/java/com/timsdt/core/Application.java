@@ -29,4 +29,8 @@ public class Application {
         I_CmsSearchConfiguration searchConfiguration = new CmsSearchConfiguration(parser, cmso);
         CmsSearchController searchController = new CmsSearchController(searchConfiguration);
     }
+
+    public static void main(String[] args) throws JSONException {
+        new Application().test();
+    }
 }
