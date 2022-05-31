@@ -37,7 +37,7 @@ dependencies {
 
     implementation "org.opencms:opencms-core:${opencms_version}"
     implementation "org.opencms:opencms-webapp:${opencms_version}"
-    implementation "org.opencms:opencms-gradle-plugin:${opencms_gradle_versionn}"
+    implementation "org.opencms:opencms-gradle-plugin:${opencms_gradle_version}"
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
