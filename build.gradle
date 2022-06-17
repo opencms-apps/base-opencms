@@ -36,7 +36,6 @@ repositories {
 dependencies {
 
     implementation "org.opencms:opencms-core:${opencms_version}"
-    implementation "org.opencms:opencms-webapp:${opencms_version}"
     implementation "org.opencms:opencms-gradle-plugin:${opencms_gradle_version}"
 
 
