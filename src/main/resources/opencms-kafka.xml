@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "/var/www/html/dtd/opencms-kafka.dtd">
+
+<opencms>
+    <kafka>
+    </kafka>
+</opencms>
