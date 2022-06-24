@@ -32,11 +32,17 @@ public class KafkaConfiguration extends A_CmsXmlConfiguration {
 
     @Override
     public Element generateXml(Element parent) {
-        return parent.addElement("karaf");
+        Element opencms = parent.addElement("opencms");
+        return opencms.addElement("kafka");
     }
 
     @Override
     public String getDtdFilename() {
         return "opencms-kafka.dtd";
+    }
+
+    @Override
+    public String getDtdSystemLocation() {
+        return "com/timsdt/core/configurations/";
     }
 }
