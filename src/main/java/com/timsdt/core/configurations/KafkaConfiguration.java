@@ -3,6 +3,9 @@ package com.timsdt.core.configurations;
 import org.apache.commons.digester3.Digester;
 import org.dom4j.Element;
 import org.opencms.configuration.A_CmsXmlConfiguration;
+import org.opencms.configuration.I_CmsXmlConfigurationWithUpdateHandler;
+import org.opencms.file.CmsObject;
+import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 
 import java.io.File;
@@ -10,12 +13,17 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class KafkaConfiguration extends A_CmsXmlConfiguration {
+public class KafkaConfiguration extends A_CmsXmlConfiguration implements I_CmsXmlConfigurationWithUpdateHandler {
     private static final String configFileName = "opencms-kafka.xml";
     private KafkaService kafkaService;
+    private CmsObject cmso;
 
     public void setupKafkaConfiguration(KafkaService kafkaService) {
         this.kafkaService = kafkaService;
+    }
+
+    public void initializeFinished() {
+        System.out.println("KafkaService :: initializeFinished");
     }
 
     @Override
@@ -49,7 +57,10 @@ public class KafkaConfiguration extends A_CmsXmlConfiguration {
 
     @Override
     public void addXmlDigesterRules(Digester digester) {
-        digester.addObjectCreate("*/kafka", KafkaService.class);
+        digester.addCallMethod("*/kafka", "initializeFinished");
+        // creation of the search manager
+        digester.addObjectCreate("*/kafka", KafkaService.class.getName(), "class");
+        //digester.addObjectCreate("*/kafka", KafkaService.class);
         digester.addSetNext("*/kafka", "setupKafkaConfiguration");
 
         digester.addCallMethod("*/kafka/producer", "setupProducer", 3);
@@ -77,5 +88,17 @@ public class KafkaConfiguration extends A_CmsXmlConfiguration {
     @Override
     public String getDtdFilename() {
         return null;
+    }
+
+    @Override
+    public void handleUpdate() throws Exception {
+        System.out.println("KafkaConfiguration :: handleUpdate");
+    }
+
+    @Override
+    public void setCmsObject(CmsObject cms) {
+        this.cmso = cms;
+        kafkaService.start();
+        System.out.println("KafkaConfiguration :: setCmsObject");
     }
 }

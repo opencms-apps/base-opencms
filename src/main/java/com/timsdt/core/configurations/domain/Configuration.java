@@ -1,10 +1,14 @@
 package com.timsdt.core.configurations.domain;
 
+import org.apache.commons.lang3.StringUtils;
+
 public abstract class Configuration {
-    protected String bootstrapServer;
+    public String bootstrapServer;
     protected String host;
     protected String port;
-    protected String topics;
+    public String topics;
+
+    public Thread m_thread;
 
     public enum Type {
         CONSUMER, PRODUCER
@@ -19,4 +23,7 @@ public abstract class Configuration {
     }
 
     public abstract Type getType();
+    public boolean invalid() {
+        return StringUtils.isAnyBlank(host, port, topics);
+    }
 }
