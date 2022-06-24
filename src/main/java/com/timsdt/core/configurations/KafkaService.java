@@ -14,9 +14,6 @@ public class KafkaService {
     public KafkaConsumer consumer;
     public KafkaProducer producer;
 
-
-    private Thread consumerThread;
-
     public synchronized void start() {
         startConfiguration(producer);
     }
