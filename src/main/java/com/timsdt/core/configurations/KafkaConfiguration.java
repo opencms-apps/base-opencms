@@ -12,6 +12,12 @@ import java.io.OutputStream;
 
 public class KafkaConfiguration extends A_CmsXmlConfiguration {
     private static final String configFileName = "opencms-kafka.xml";
+    private KafkaService kafkaService;
+
+    public void setupKafkaConfiguration(KafkaService kafkaService) {
+        this.kafkaService = kafkaService;
+    }
+
     @Override
     protected void initMembers() {
         setXmlFileName(configFileName);
@@ -43,7 +49,19 @@ public class KafkaConfiguration extends A_CmsXmlConfiguration {
 
     @Override
     public void addXmlDigesterRules(Digester digester) {
-        //do nothing
+        digester.addObjectCreate("*/kafka", KafkaService.class);
+        digester.addSetNext("*/kafka", "setupKafkaConfiguration");
+
+        digester.addCallMethod("*/kafka/producer", "setupProducer", 3);
+        digester.addCallParam("*/kafka/producer", 0, "host");
+        digester.addCallParam("*/kafka/producer", 1, "port");
+        digester.addCallParam("*/kafka/producer", 2, "topics");
+
+        digester.addCallMethod("*/kafka/consumer", "setupConsumer", 3);
+        digester.addCallParam("*/kafka/consumer", 0, "host");
+        digester.addCallParam("*/kafka/consumer", 1, "port");
+        digester.addCallParam("*/kafka/consumer", 2, "topics");
+
     }
 
     @Override
