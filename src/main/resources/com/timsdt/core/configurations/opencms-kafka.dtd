@@ -1,3 +1,0 @@
-<!ELEMENT opencms (kafka)>
-<!ELEMENT kafka (bootstrapserver?)>
-<!ELEMENT bootstrapserver EMPTY>

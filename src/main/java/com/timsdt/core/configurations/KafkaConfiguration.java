@@ -3,46 +3,61 @@ package com.timsdt.core.configurations;
 import org.apache.commons.digester3.Digester;
 import org.dom4j.Element;
 import org.opencms.configuration.A_CmsXmlConfiguration;
+import org.opencms.main.OpenCms;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class KafkaConfiguration extends A_CmsXmlConfiguration {
-
-    public KafkaConfiguration() {
-        System.out.println("Init me");
-    }
-
+    private static final String configFileName = "opencms-kafka.xml";
     @Override
     protected void initMembers() {
+        setXmlFileName(configFileName);
+        String configPath = OpenCms.getSystemInfo().getConfigFolder() + this.configFileName ;
+        File config = new File(configPath);
+        if (config.exists()) {
+            return;
+        }
+        InputStream stream = null;
+        OutputStream resStreamOut = null;
+        String jarFolder;
+        try {
+            stream = KafkaConfiguration.class.getResourceAsStream(configFileName);
+            if (stream == null) {
+                System.out.println("Cannot get resource \"" + configFileName + "\" from Jar file.");
+                return;
+            }
 
+            int readBytes;
+            byte[] buffer = new byte[4096];
+            resStreamOut = new FileOutputStream(configPath);
+            while ((readBytes = stream.read(buffer)) > 0) {
+                resStreamOut.write(buffer, 0, readBytes);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
     public void addXmlDigesterRules(Digester digester) {
-        //
-    }
-
-    @Override
-    protected void setXmlFileName(String fileName) {
-        System.out.println(fileName);
-    }
-
-    @Override
-    public String getXmlFileName() {
-        return "opencms-kafka.xml";
+        //do nothing
     }
 
     @Override
     public Element generateXml(Element parent) {
-        Element opencms = parent.addElement("opencms");
-        return opencms.addElement("kafka");
-    }
-
-    @Override
-    public String getDtdFilename() {
-        return "opencms-kafka.dtd";
+        return parent.addElement("kafka");
     }
 
     @Override
     public String getDtdSystemLocation() {
-        return "com/timsdt/core/configurations/";
+        return null;
+    }
+
+    @Override
+    public String getDtdFilename() {
+        return null;
     }
 }

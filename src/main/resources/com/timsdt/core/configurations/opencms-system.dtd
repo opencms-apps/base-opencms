@@ -1,0 +1,606 @@
+<!--
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (system)>
+
+<!--
+# <system> configuration:
+#
+# This node contains various core runtime options for OpenCms.
+-->
+<!ELEMENT system (
+	internationalization,
+	mail,
+	events?,
+	versionhistory,
+	resourceinit?,
+	requesthandlers?,
+	passwordhandler,
+	validationhandler?,
+	loginmanager?,
+	loginmessage?,
+	sax-impl-system-properties?,
+	runtimeproperties?,
+	runtimeclasses,
+	defaultusers,
+	defaultcontentencoding,
+	memorymonitor?,
+	flexcache,
+	http-authentication,
+	resultcache,
+	content-notification?,
+	authorizationhandler?,
+	publishmanager?,
+	session-storageprovider?,
+	permissionhandler?,
+	servletcontainer-settings?,
+	ade?,
+	sitemap?,
+	subscriptionmanager?,
+	workflow?,
+	user-session-mode?,
+	credentials-resolver?,
+	publish-list-remove-mode?,
+	detail-page-handler?,
+	restrict-detail-contents?,
+	shell-server?,
+	letsencrypt?
+	)>
+
+<!--
+# Version history settings.
+# The OpenCms VFS keeps a version history for old versions of files.
+# This is done as a binary 1:1 copy of the original file (i.e. no "diff").
+#
+# The version history is enabled by default. You can enable / disable it with
+# the "enabled" attribute.
+#
+# Because of this the database would grow very large if unlimited versions
+# would be stored. The "count" attribute controls the number of binary copies
+# that are kept in the database per individual file.
+# If a file has more versions, the oldest binary content is deleted (you can not
+# re-create this version anymore). However, the basic information about the old
+# version (i.e. who did the publish etc.) is still kept in the database.
+#
+# You can also set the optional "deleted" attribute to control the number of
+# versions for deleted files. Is ommitted the "count" attribute is used.
+-->
+<!ELEMENT versionhistory EMPTY>
+<!ATTLIST versionhistory enabled (TRUE|true|FALSE|false) #REQUIRED count CDATA #REQUIRED deleted CDATA "-1">
+
+<!--
+# Internationalization settings.
+-->
+<!ELEMENT internationalization (localehandler, localesconfigured, localesdefault, timezone?, reuse-elements?)>
+
+<!ELEMENT localehandler EMPTY>
+<!ATTLIST localehandler class CDATA #REQUIRED>
+
+<!ELEMENT localesconfigured (locale+)>
+<!ELEMENT localesdefault (locale+)>
+
+<!ELEMENT locale (#PCDATA)>
+
+<!ELEMENT timezone (#PCDATA)>
+
+<!ELEMENT reuse-elements (#PCDATA)>
+
+<!--
+# Mail settings.
+-->
+<!ELEMENT mail (mailfrom, mailhost+)>
+<!ELEMENT mailfrom (#PCDATA)>
+<!ELEMENT mailhost EMPTY>
+<!ATTLIST mailhost
+	name CDATA #REQUIRED
+	order CDATA #IMPLIED
+	port CDATA #IMPLIED
+	protocol CDATA #IMPLIED
+	security CDATA #IMPLIED
+	user CDATA  #IMPLIED
+	password CDATA #IMPLIED>
+
+<!--
+# Resource initializer settings.
+-->
+<!ELEMENT resourceinit (resourceinithandler*)>
+<!ELEMENT resourceinithandler EMPTY>
+<!ATTLIST resourceinithandler class CDATA #REQUIRED>
+
+<!--
+# Request handlers:
+# Request handlers are used for special requests that should NOT be mapped to a VFS resource.
+# See the JavaDoc of interface org.opencms.main.I_CmsRequestHandler for more details.
+-->
+<!ELEMENT requesthandlers (requesthandler*)>
+<!ELEMENT requesthandler EMPTY>
+<!ATTLIST requesthandler class CDATA #REQUIRED>
+
+<!--
+# Password handler:
+# Provides methods for password encryption and password validation.
+# See the JavaDoc of interface org.opencms.security.I_CmsPasswordHandler for more details.
+-->
+<!ELEMENT passwordhandler (encoding, digest-type, param*)>
+<!ATTLIST passwordhandler class CDATA #REQUIRED>
+<!ELEMENT encoding (#PCDATA)>
+<!ELEMENT digest-type (#PCDATA)>
+
+<!--
+# Validation handler:
+# Provides all kind of validation methods.
+# See the JavaDoc of interface org.opencms.security.I_CmsValidationHandler for more details.
+-->
+<!ELEMENT validationhandler EMPTY>
+<!ATTLIST validationhandler class CDATA #REQUIRED>
+
+<!--
+# Login manager:
+# The login manager counts the bad logins of a user and disables this user
+# for a given number of minutes in case a certain treshold is reached.
+# Additionally, a login security option to choose the PC type (private or public) can be enabled.
+-->
+<!ELEMENT loginmanager (disableMinutes, maxBadAttempts, enableSecurity?, tokenLifetime?,maxInactiveTime?, passwordChangeInterval?, userDataCheckInterval?)>
+
+<!ELEMENT maxBadAttempts (#PCDATA)>
+<!ELEMENT disableMinutes (#PCDATA)>
+<!ELEMENT enableSecurity (#PCDATA)>
+<!ELEMENT tokenLifetime (#PCDATA)> 
+<!ELEMENT maxInactiveTime (#PCDATA)>
+<!ELEMENT passwordChangeInterval (#PCDATA)>
+<!ELEMENT userDataCheckInterval (#PCDATA)>
+
+<!--
+# Login message:
+# This is a message which is displayed to each user upon login.
+# Also, the login can be forbidden for all non-Admin users.
+-->
+<!ELEMENT loginmessage (enabled, message, loginForbidden, timeStart?, timeEnd?)>
+
+<!ELEMENT enabled (#PCDATA)>
+<!ELEMENT message (#PCDATA)>
+<!ELEMENT loginForbidden (#PCDATA)>
+<!ELEMENT timeStart (#PCDATA)>
+<!ELEMENT timeEnd (#PCDATA)>
+
+
+
+<!--
+# Event settings:
+# It is possible to replace the default event manager with a custom implementation
+# by configuring the name of the event manager class. The event manager class must
+# always be extended from org.opencms.main.CmsEventManager.
+-->
+
+<!ELEMENT events (eventmanager?)>
+
+<!ELEMENT eventmanager EMPTY>
+<!ATTLIST eventmanager class CDATA #REQUIRED>
+
+<!--
+# Publish list remove mode.
+# This setting controls what happens to user publish lists when resources are published.
+# With the value "currentUser", the resource's user publish list entry for the current user is removed.
+# With the value "allUsers", the resource's user publish list entries for all users are removed.
+-->
+<!ELEMENT publish-list-remove-mode EMPTY>
+<!ATTLIST publish-list-remove-mode
+	mode (allUsers|currentUser) #REQUIRED>
+	
+<!--
+# Sets if the SAX parser implementation classes should be stored in the system properties.
+# This removes an XML parsing bottle neck in high load scenarios, but prevents other web applications from
+# running in the same servlet-container.
+# Default value is 'false'. Set to 'true' to use the feature.
+-->
+<!ELEMENT sax-impl-system-properties (#PCDATA)>
+
+<!--
+# Optional configuration that controls some additional information as key/value param pairs
+# Parameters and values are stored as OpenCms runtime properties.
+-->
+<!ELEMENT runtimeproperties (param*)>
+
+<!--
+# Configuration to set the class name of the runtime info factory and system info.
+-->
+<!ELEMENT runtimeclasses (runtimeinfo)>
+<!ELEMENT runtimeinfo EMPTY>
+<!ATTLIST runtimeinfo class CDATA #REQUIRED>
+
+<!--
+# Default user/group names:
+# These names can not be changed after the initial OpenCms setup
+# Provides access to the names of the OpenCms default users and groups.
+-->
+
+<!ELEMENT defaultusers (user-admin, user-guest, user-export, user-deletedresource?, group-administrators, group-projectmanagers?, group-users, group-guests)>
+
+<!ELEMENT user-admin (#PCDATA)>
+<!ELEMENT user-guest (#PCDATA)>
+<!ELEMENT user-export (#PCDATA)>
+<!ELEMENT user-deletedresource (#PCDATA)>
+<!ELEMENT group-administrators (#PCDATA)>
+<!ELEMENT group-projectmanagers (#PCDATA)>
+<!ELEMENT group-users (#PCDATA)>
+<!ELEMENT group-guests (#PCDATA)>
+
+<!--
+#
+# Default encoding to use for generating HTTP responses.
+# It is recommended to change this only in special environments.
+# The default is "UTF-8", but in case you require only western european
+# char support you can e.g. change this to "ISO-8859-1".
+-->
+<!ELEMENT defaultcontentencoding (#PCDATA)>
+
+
+<!--
+#
+# MemoryMonitor configuration
+-->
+<!ELEMENT memorymonitor (maxusagepercent, log-interval, email-interval?, warning-interval, email-sender?, email-receiver?)>
+<!ATTLIST memorymonitor class CDATA "">
+
+<!ELEMENT maxusagepercent (#PCDATA)>
+<!ELEMENT log-interval (#PCDATA)>
+<!ELEMENT email-interval (#PCDATA)>
+<!ELEMENT warning-interval (#PCDATA)>
+<!ELEMENT email-sender (#PCDATA)>
+<!ELEMENT email-receiver (receiver+)>
+<!ELEMENT receiver (#PCDATA)>
+
+
+<!--
+#
+# FlexCache configuration
+-->
+<!ELEMENT flexcache (cache-enabled, cache-offline, maxcachebytes, avgcachebytes, maxentrybytes, maxkeys, device-selector?)>
+
+<!--
+# Enable or disable the FlexCache here with the "cache-enabled" node.
+# In case you disable the FlexCache, you do not need to bother
+# about the settings of the other Flex cache values.
+-->
+<!ELEMENT cache-enabled (#PCDATA)>
+
+<!--
+# In a development environment, we recommend to set the value of
+# the "cache-offline" node to "true" so that you can test out the caching
+# behaviour of the application without publishing.
+# In a production environment you should set "cache-offline" node
+# to "false".
+-->
+<!ELEMENT cache-offline (#PCDATA)>
+
+<!--
+# Sizing parameters for the cached "entries" (ie. pages) in the FlexCache.
+# The amount of server memory available obviously is the
+# critical factor here. The values below are set in byte size.
+# The default is 2mb memory for the cached pages _or_ a maximum of 4000
+# cached page variations in total.
+-->
+<!ELEMENT maxcachebytes (#PCDATA)>
+<!ELEMENT avgcachebytes (#PCDATA)>
+<!ELEMENT maxentrybytes (#PCDATA)>
+<!ELEMENT maxkeys (#PCDATA)>
+
+<!--
+# Setting the class for the device slector
+-->
+<!ELEMENT device-selector EMPTY>
+<!ATTLIST device-selector class CDATA #REQUIRED>
+
+
+<!--
+#
+# HTTP basic authentication settings.
+-->
+<!ELEMENT http-authentication (browser-based, form-based?)>
+
+<!--
+# Enable or disable browser-based HTTP authentication.
+# Values are:
+# - true|basic: enable browser based basic HTTP authentication
+# - false: disable browser based HTTP authentication, use form based if a form url is set
+# - other values: enable browser based HTTP authentication with an alternative mechanism specified by the value (must be supported by authorization handler)
+-->
+<!ELEMENT browser-based (#PCDATA)>
+
+<!--
+# If bowser-based HTTP basic authentication is disabled, the user gets
+# redirected to the OpenCms URI specified in this node for a form-based
+# HTTP basic authentication.
+# Since this is a system wide setting, users are able to specify different
+# authentication forms by setting the property "login-form" on resources.
+-->
+<!ELEMENT form-based (#PCDATA)>
+
+
+<!--
+# Driver manager cache settings.
+# These settings control the size of various internal caches in the OpenCms database layer.
+-->
+<!ELEMENT resultcache (
+	keygenerator,
+	size-users,
+	size-groups,
+	size-orgunits?,
+	size-usergroups,
+	size-projects,
+	size-projectresources?,
+	size-resources,
+	size-resourcelists,
+	size-properties,
+	size-propertylists?,
+	size-accesscontrollists,
+	size-permissions,
+	size-roles?)>
+
+<!--
+# The name of the class to generate cache keys.
+-->
+<!ELEMENT keygenerator (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for users.
+-->
+<!ELEMENT size-users (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for groups.
+-->
+<!ELEMENT size-groups (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for organizational units.
+# If not given, the size-groups is used.
+-->
+<!ELEMENT size-orgunits (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for user/group relations.
+-->
+<!ELEMENT size-usergroups (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for projects.
+-->
+<!ELEMENT size-projects (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for project resources.
+# If not given, the size-projects is used.
+-->
+<!ELEMENT size-projectresources (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for resources.
+-->
+<!ELEMENT size-resources (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for lists of resources.
+-->
+<!ELEMENT size-resourcelists (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for properties.
+-->
+<!ELEMENT size-properties (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for property lists.
+# If not given, the size-properties is used.
+-->
+<!ELEMENT size-propertylists (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for ACLS.
+-->
+<!ELEMENT size-accesscontrollists (#PCDATA)>
+
+<!--
+# The size of the security manager's cache for permission checks.
+-->
+<!ELEMENT size-permissions (#PCDATA)>
+
+<!--
+# The size of the driver manager's cache for roles.
+-->
+<!ELEMENT size-roles (#PCDATA)>
+
+<!--
+# Content notification settings.
+-->
+<!ELEMENT content-notification (notification-time?, notification-project)>
+
+<!--
+# The duration after which responsibles will be notified about out-dated content (in days).
+-->
+<!ELEMENT notification-time (#PCDATA)>
+
+<!--
+# The project in which timestamps for the content notification are read
+-->
+<!ELEMENT notification-project (#PCDATA)>
+
+<!--
+# Authorization handler:
+# Provides methods for SSO.
+# See the JavaDoc of interface org.opencms.security.I_CmsAuthorizationHandler for more details.
+-->
+<!ELEMENT authorizationhandler (parameters?)>
+<!ATTLIST authorizationhandler class CDATA #REQUIRED>
+
+<!ELEMENT parameters (param*)>
+
+<!ELEMENT param (#PCDATA)>
+<!ATTLIST param name CDATA #REQUIRED>
+
+<!--
+# Publish manager:
+# Provides the configuration parameters for the publish history and queue.
+# See the package org.opencms.publish for more details.
+-->
+<!ELEMENT publishmanager (history-size, queue-persistance?, queue-shutdowntime?, publish-list-delete-mode?)>
+
+
+<!ELEMENT publish-list-delete-mode (#PCDATA)>
+
+
+
+<!--
+# The size of the publish queue
+-->
+<!ELEMENT history-size (#PCDATA)>
+
+<!--
+# Indicates if the publish queue is re-initialized on restart of the system.
+# The value is optional, the default is "false" if no value is provided.
+#
+# The #PCDATA value will be evaluated with Boolean.valueOf(#PCDATA).booleanValue().
+# If the result is "true", the class instance will be re-used.
+-->
+<!ELEMENT queue-persistance (#PCDATA)>
+
+<!--
+# The amount of time in seconds the system waits for a publish job
+# to be finished during shutdown.
+# The value is optional, the default is 1 second if no value is provided.
+-->
+<!ELEMENT queue-shutdowntime (#PCDATA)>
+
+<!--
+# Session storage provider:
+# Provides a storage implementation for the user session.
+# See the JavaDoc of interface org.opencms.main.I_CmsSessionStorageProvider for more details.
+-->
+<!ELEMENT session-storageprovider EMPTY>
+<!ATTLIST session-storageprovider class CDATA #REQUIRED>
+
+<!--
+# Permission handler:
+# provides the implementation of the permission check.
+# See the JavaDoc of interface org.opencms.db.I_CmsPermissionHandler for more details.
+-->
+<!ELEMENT permissionhandler EMPTY>
+<!ATTLIST permissionhandler class CDATA #REQUIRED>
+
+<!--
+# Servlet container settings:
+# OpenCms tries to identify your servlet container and to set the right settings for optimal behavior,
+# But this is not always possible, so here you have the chance to overwrite these settings, additionally
+# you should also check the 'servlet.exception.enabled' property in the opencms.properties file.
+# See the JavaDoc of class org.opencms.main.CmsServletContainerSettings for more details.
+-->
+<!ELEMENT servletcontainer-settings (prevent-response-flush?,release-tags-after-end?,request-error-page-attribute?)>
+<!ATTLIST servletcontainer-settings mode (auto|manual|AUTO|MANUAL) #REQUIRED>
+<!ELEMENT prevent-response-flush (#PCDATA)>
+<!ELEMENT release-tags-after-end (#PCDATA)>
+<!ELEMENT request-error-page-attribute (#PCDATA)>
+
+<!--
+# The advanced direct edit settings.
+-->
+<!ELEMENT ade (configuration?, parameters?,
+			   ade-cache)>
+
+<!--
+# Configuration class for ADE.
+-->
+<!ELEMENT configuration EMPTY >
+<!ATTLIST configuration class CDATA #REQUIRED>
+
+<!--
+# Cache sizes for ADE.
+-->
+<!ELEMENT ade-cache (containerpages, groupcontainers) >
+
+<!--
+# Container page caches.
+-->
+<!ELEMENT containerpages EMPTY >
+<!ATTLIST containerpages offline CDATA #REQUIRED>
+<!ATTLIST containerpages online CDATA #REQUIRED>
+<!--
+# Groupcontainer caches.
+-->
+<!ELEMENT groupcontainers EMPTY >
+<!ATTLIST groupcontainers offline CDATA #REQUIRED>
+<!ATTLIST groupcontainers online CDATA #REQUIRED>
+
+<!--
+# The sitemap settings.
+-->
+<!ELEMENT sitemap (sitemap-cache)>
+
+<!--
+# Cache sizes for the sitemap.
+-->
+<!ELEMENT sitemap-cache (documents) >
+
+<!--
+# Document caches.
+-->
+<!ELEMENT documents EMPTY >
+<!ATTLIST documents offline CDATA #REQUIRED>
+<!ATTLIST documents online CDATA #REQUIRED>
+
+<!--
+# Subscription manager:
+# Configures the options of the subscription manager:
+# is it enabled, the database pool name to use and the maximum number of visited resources to store per user.
+-->
+<!ELEMENT subscriptionmanager EMPTY>
+<!ATTLIST subscriptionmanager enabled (true|false|TRUE|FALSE) "false" poolname CDATA #REQUIRED maxvisited CDATA #IMPLIED>
+
+
+<!ELEMENT workflow (parameters)>
+<!ATTLIST workflow class CDATA #REQUIRED>
+
+
+
+<!ELEMENT user-session-mode (#PCDATA)>
+<!ELEMENT credentials-resolver (#PCDATA)>
+
+<!--
+# Restrict detail contents: If set to 'true', will not allow detail contents
+# from one proper site to be rendered in a detail page from another proper site.
+# If this is not set explicitly, defaults to 'true'. 
+-->
+<!ELEMENT restrict-detail-contents (#PCDATA) >
+
+
+<!-- 
+# RMI based CmsShell server configuration.
+# Can be enabled or disabled, also the RMI registry port can be configured 
+-->
+<!ELEMENT shell-server EMPTY>
+<!ATTLIST shell-server enabled CDATA #REQUIRED>
+<!ATTLIST shell-server port CDATA #IMPLIED>
+
+<!-- 
+# LetsEncrypt configuration.
+-->
+<!ELEMENT letsencrypt EMPTY>
+<!-- The host name of the LetsEncrypt container which should be notified when certificate config changes. -->
+<!ATTLIST letsencrypt host CDATA #REQUIRED>
+
+<!-- The port of the LetsEncrypt container to use for the 'certificate config changed' notification. -->
+<!ATTLIST letsencrypt port CDATA #REQUIRED>
+
+<!-- The mode : workplace, sites, all (= workplace + sites) or disabled -->
+<!ATTLIST letsencrypt mode CDATA #REQUIRED>
+
+<!-- The path to which the certificate configuration should be written. -->
+<!ATTLIST letsencrypt certconfig CDATA #REQUIRED>
+
+<!ATTLIST letsencrypt trigger (siteConfig|webserverThread) #IMPLIED>
+
+<!--
+# The detail page handler class with parameters. 
+-->  
+<!ELEMENT detail-page-handler (param*) >
+<!ATTLIST detail-page-handler class CDATA #REQUIRED >
+
